@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Post Date Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide-react@0.292.0/dist/lucide-react.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background-image: linear-gradient(135deg, #a855f7, #6366f1);
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-purple-50 dark:bg-gray-900 transition-colors duration-500">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-8 md:p-12">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-search"><path d="M21 12V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m18 18-1.5-1.5"/><circle cx="15" cy="15" r="3"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">LinkedIn Post Date Finder</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Enter a public LinkedIn post URL to find its publication date.</p>
+                    </div>
+                </div>
+
+                <form id="linkedin-form" class="space-y-6">
+                    <div>
+                        <label for="linkedin-url" class="sr-only">LinkedIn Post URL</label>
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>
+                            <input type="url" id="linkedin-url" placeholder="https://www.linkedin.com/posts/..." class="w-full pl-12 pr-4 py-3 bg-purple-50 dark:bg-gray-700 text-gray-800 dark:text-white border-2 border-transparent focus:border-purple-500 focus:ring-purple-500 rounded-lg transition-all" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full gradient-bg text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <span>Find Publication Date</span>
+                    </button>
+                </form>
+
+                <div id="result-container" class="mt-8">
+                    <!-- Loading State -->
+                    <div id="loading-state" class="hide flex flex-col items-center justify-center text-center p-6 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                        <svg class="animate-spin h-8 w-8 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300">Analyzing post...</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Please wait while we fetch the details.</p>
+                    </div>
+
+                    <!-- Success State -->
+                    <div id="success-state" class="hide text-center p-6 bg-green-50 dark:bg-green-900/50 rounded-lg border border-green-200 dark:border-green-700">
+                         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-green-600 dark:text-green-400"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                         </div>
+                        <p class="mt-4 text-base text-gray-600 dark:text-gray-300">Published on:</p>
+                        <p id="publish-date" class="text-2xl font-bold text-gray-800 dark:text-white"></p>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="error-state" class="hide text-center p-6 bg-red-50 dark:bg-red-900/50 rounded-lg border border-red-200 dark:border-red-700">
+                         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-red-600 dark:text-red-400"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                         </div>
+                        <p class="mt-4 text-lg font-semibold text-red-700 dark:text-red-300">An Error Occurred</p>
+                        <p id="error-message" class="text-sm text-red-600 dark:text-red-400"></p>
+                    </div>
+
+                     <!-- Footer Content -->
+                    <div class="text-center mt-6 space-y-2">
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Disclaimer: This tool works for public posts only and relies on third-party services and LinkedIn's current page structure, which may change. Accuracy is not guaranteed.</p>
+                         <p class="text-sm text-gray-500 dark:text-gray-400">By Kim E Wolf</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('linkedin-form');
+        const urlInput = document.getElementById('linkedin-url');
+        const resultContainer = document.getElementById('result-container');
+        
+        const loadingState = document.getElementById('loading-state');
+        const successState = document.getElementById('success-state');
+        const errorState = document.getElementById('error-state');
+        
+        const publishDateEl = document.getElementById('publish-date');
+        const errorMessageEl = document.getElementById('error-message');
+
+        // Function to hide all state sections
+        const hideAllStates = () => {
+            loadingState.classList.add('hide');
+            successState.classList.add('hide');
+            errorState.classList.add('hide');
+        };
+
+        // Event listener for the form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = urlInput.value.trim();
+
+            if (!url || !url.includes('linkedin.com/posts/')) {
+                hideAllStates();
+                errorMessageEl.textContent = 'Please enter a valid LinkedIn post URL.';
+                errorState.classList.remove('hide');
+                return;
+            }
+
+            hideAllStates();
+            loadingState.classList.remove('hide');
+
+            // --- IMPROVED FETCH LOGIC WITH TIMEOUT ---
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, 15000); // 15-second timeout
+
+            try {
+                // We use a CORS proxy to bypass browser restrictions.
+                // Note: This is a public proxy and might be unreliable.
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl, { signal: controller.signal });
+                
+                clearTimeout(timeoutId); // Clear timeout if fetch succeeds
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok, status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const htmlContent = data.contents;
+
+                if (!htmlContent) {
+                    throw new Error('Could not fetch the post content. The post may be private, deleted, or the URL is incorrect.');
+                }
+                
+                // The publication timestamp is often found inside a <code> tag as part of a JSON object.
+                // This is fragile and might break if LinkedIn changes its HTML structure.
+                const regex = /"createdAt":(\d{13,})/; // LinkedIn uses a 13-digit Unix timestamp (milliseconds)
+                const match = htmlContent.match(regex);
+                
+                if (match && match[1]) {
+                    const timestamp = parseInt(match[1], 10);
+                    const publishDate = new Date(timestamp);
+
+                    const options = {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    };
+                    
+                    hideAllStates();
+                    publishDateEl.textContent = publishDate.toLocaleString(undefined, options);
+                    successState.classList.remove('hide');
+                } else {
+                    throw new Error('Could not find the publication date in the post. The format may have changed or the tool needs an update.');
+                }
+
+            } catch (error) {
+                clearTimeout(timeoutId);
+                hideAllStates();
+                console.error("Extraction failed:", error);
+                if (error.name === 'AbortError') {
+                     errorMessageEl.textContent = 'The request timed out. Please try again or use a different post.';
+                } else {
+                     errorMessageEl.textContent = error.message || 'An unknown error occurred.';
+                }
+                errorState.classList.remove('hide');
+            }
+        });
+
+    </script>
+</body>
+</html>
