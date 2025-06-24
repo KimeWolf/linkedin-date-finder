@@ -3,173 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn Post Date Finder</title>
+    <title>LinkedIn Post Date Extractor</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide-react@0.292.0/dist/lucide-react.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
-        .gradient-bg {
-            background-image: linear-gradient(135deg, #a855f7, #6366f1);
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px; /* More rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
         }
-        .hide {
-            display: none;
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db; /* Light gray border */
+            border-radius: 8px; /* Rounded input field */
+            font-size: 1rem;
+            color: #374151;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        .button {
+            background-color: #0077b5; /* LinkedIn blue */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 119, 181, 0.2);
+        }
+        .button:hover {
+            background-color: #005f93; /* Darker blue on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e0f2f7; /* Light blue background for results */
+            border: 1px solid #b3e0ed; /* Blue border */
+            border-radius: 8px;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            color: #212121;
+            word-break: break-all; /* Ensures long URLs or dates break correctly */
+            text-align: left;
+        }
+        .error-message {
+            color: #dc2626; /* Red for errors */
+            margin-top: 10px;
+            font-weight: 500;
         }
     </style>
 </head>
-<body class="bg-purple-50 dark:bg-gray-900 transition-colors duration-500">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
-            <div class="p-8 md:p-12">
-                <div class="flex items-center space-x-4 mb-6">
-                    <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-search"><path d="M21 12V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m18 18-1.5-1.5"/><circle cx="15" cy="15" r="3"/></svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">LinkedIn Post Date Finder</h1>
-                        <p class="text-gray-500 dark:text-gray-400 mt-1">Enter a public LinkedIn post URL to find its publication date.</p>
-                    </div>
-                </div>
+<body>
+    <div class="container">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">LinkedIn Post Date Extractor</h1>
 
-                <form id="linkedin-form" class="space-y-6">
-                    <div>
-                        <label for="linkedin-url" class="sr-only">LinkedIn Post URL</label>
-                        <div class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"/></svg>
-                            <input type="url" id="linkedin-url" placeholder="https://www.linkedin.com/posts/..." class="w-full pl-12 pr-4 py-3 bg-purple-50 dark:bg-gray-700 text-gray-800 dark:text-white border-2 border-transparent focus:border-purple-500 focus:ring-purple-500 rounded-lg transition-all" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full gradient-bg text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                        <span>Find Publication Date</span>
-                    </button>
-                </form>
-
-                <div id="result-container" class="mt-8">
-                    <!-- Loading State -->
-                    <div id="loading-state" class="hide flex flex-col items-center justify-center text-center p-6 bg-purple-50 dark:bg-gray-700 rounded-lg">
-                        <svg class="animate-spin h-8 w-8 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p class="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-300">Analyzing post...</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Please wait while we fetch the details.</p>
-                    </div>
-
-                    <!-- Success State -->
-                    <div id="success-state" class="hide text-center p-6 bg-green-50 dark:bg-green-900/50 rounded-lg border border-green-200 dark:border-green-700">
-                         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-green-600 dark:text-green-400"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                         </div>
-                        <p class="mt-4 text-base text-gray-600 dark:text-gray-300">Published on:</p>
-                        <p id="publish-date" class="text-2xl font-bold text-gray-800 dark:text-white"></p>
-                    </div>
-                    
-                    <!-- Error State -->
-                    <div id="error-state" class="hide text-center p-6 bg-red-50 dark:bg-red-900/50 rounded-lg border border-red-200 dark:border-red-700">
-                         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-red-600 dark:text-red-400"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                         </div>
-                        <p class="mt-4 text-lg font-semibold text-red-700 dark:text-red-300">An Error Occurred</p>
-                        <p id="error-message" class="text-sm text-red-600 dark:text-red-400"></p>
-                    </div>
-
-                     <!-- Disclaimer -->
-                    <div class="text-center mt-6">
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Disclaimer: This tool works for public posts only and relies on third-party services and LinkedIn's current page structure, which may change. Accuracy is not guaranteed.</p>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-4 text-gray-600">
+            <p>Enter a LinkedIn post URL below to find its exact publication date.</p>
+            <p class="text-sm mt-2">Example: <code>https://www.linkedin.com/posts/yourname_post-title-activity-1234567890123456789</code></p>
         </div>
+
+        <input type="text" id="linkedinUrlInput" class="input-field" placeholder="Paste LinkedIn post URL here...">
+        <button id="extractDateButton" class="button">Get Publication Date</button>
+
+        <div id="result" class="result-box">
+            The publication date will appear here.
+        </div>
+        <div id="errorMessage" class="error-message"></div>
     </div>
 
     <script>
-        const form = document.getElementById('linkedin-form');
-        const urlInput = document.getElementById('linkedin-url');
-        const resultContainer = document.getElementById('result-container');
-        
-        const loadingState = document.getElementById('loading-state');
-        const successState = document.getElementById('success-state');
-        const errorState = document.getElementById('error-state');
-        
-        const publishDateEl = document.getElementById('publish-date');
-        const errorMessageEl = document.getElementById('error-message');
+        document.getElementById('extractDateButton').addEventListener('click', extractDateFromLinkedInUrl);
 
-        // Function to hide all state sections
-        const hideAllStates = () => {
-            loadingState.classList.add('hide');
-            successState.classList.add('hide');
-            errorState.classList.add('hide');
-        };
-
-        // Event listener for the form submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function extractDateFromLinkedInUrl() {
+            const urlInput = document.getElementById('linkedinUrlInput');
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('errorMessage');
             const url = urlInput.value.trim();
 
-            // Basic URL validation
-            if (!url || !url.includes('linkedin.com/posts/')) {
-                hideAllStates();
-                errorMessageEl.textContent = 'Please enter a valid LinkedIn post URL.';
-                errorState.classList.remove('hide');
+            resultDiv.textContent = 'The publication date will appear here.'; // Reset result
+            errorDiv.textContent = ''; // Clear previous errors
+
+            if (!url) {
+                errorDiv.textContent = 'Please enter a LinkedIn post URL.';
                 return;
             }
 
-            hideAllStates();
-            loadingState.classList.remove('hide');
+            // Regex to find the post ID (a 19-digit number)
+            // It looks for 'activity-' followed by 19 digits or 'ugcPost-' followed by 19 digits
+            const postIdMatch = url.match(/(?:activity|ugcPost)-(\d{19})/);
 
-            try {
-                // We use a CORS proxy to bypass browser restrictions.
-                // Note: This is a public proxy and might be unreliable.
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok, status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const htmlContent = data.contents;
+            if (postIdMatch && postIdMatch[1]) {
+                const postId = postIdMatch[1];
+                let publicationDate = 'Could not determine date.'; // Default message
 
-                if (!htmlContent) {
-                    throw new Error('Could not fetch the post content. The post may be private, deleted, or the URL is incorrect.');
-                }
-                
-                // The publication timestamp is often found inside a <code> tag as part of a JSON object.
-                // We'll use a regular expression to find the 'createdAt' timestamp. This is fragile and might break if LinkedIn changes its HTML structure.
-                const regex = /"createdAt":(\d{13,})/; // LinkedIn uses a 13-digit Unix timestamp (milliseconds)
-                const match = htmlContent.match(regex);
-                
-                if (match && match[1]) {
-                    const timestamp = parseInt(match[1], 10);
-                    const publishDate = new Date(timestamp);
+                try {
+                    // Convert the 19-digit post ID to its binary representation
+                    // Using BigInt for large numbers to prevent precision loss
+                    const postIdBigInt = BigInt(postId);
+                    let binaryPostId = postIdBigInt.toString(2);
 
-                    const options = {
+                    // LinkedIn timestamps are typically encoded in the first 41 bits
+                    // of the 64-bit activity ID. This represents milliseconds since epoch.
+                    // Pad with leading zeros if necessary to ensure at least 41 bits
+                    while (binaryPostId.length < 41) {
+                        binaryPostId = '0' + binaryPostId;
+                    }
+
+                    // Extract the first 41 bits
+                    const timestampBinary = binaryPostId.substring(0, 41);
+
+                    // Convert the 41 bits back to a decimal number (milliseconds)
+                    const unixTimestampMs = parseInt(timestampBinary, 2);
+
+                    // Create a Date object from the Unix timestamp (milliseconds)
+                    const date = new Date(unixTimestampMs);
+
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Invalid date calculated.');
+                    }
+
+                    // Format the date for display
+                    publicationDate = date.toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
+                        second: '2-digit',
                         timeZoneName: 'short'
-                    };
-                    
-                    hideAllStates();
-                    publishDateEl.textContent = publishDate.toLocaleString(undefined, options);
-                    successState.classList.remove('hide');
-                } else {
-                    throw new Error('Could not find the publication date in the post. The post might be in a different format or this tool needs an update.');
+                    });
+
+                } catch (e) {
+                    console.error('Error parsing LinkedIn ID:', e);
+                    errorDiv.textContent = 'Failed to extract date. The URL format might be unsupported or the ID is invalid.';
+                    return;
                 }
-
-            } catch (error) {
-                hideAllStates();
-                console.error("Extraction failed:", error);
-                errorMessageEl.textContent = error.message || 'An unknown error occurred.';
-                errorState.classList.remove('hide');
+                resultDiv.textContent = `Published: ${publicationDate}`;
+            } else {
+                errorDiv.textContent = 'No valid LinkedIn post ID found in the URL. Please ensure it is a direct post link.';
             }
-        });
-
+        }
     </script>
 </body>
 </html>
